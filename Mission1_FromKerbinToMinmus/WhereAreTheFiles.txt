@@ -1,0 +1,1 @@
+The files for this mission can be found in the repository kOS-TutorialScripts: https://github.com/PhilouDS/kOS-TutorialScripts
