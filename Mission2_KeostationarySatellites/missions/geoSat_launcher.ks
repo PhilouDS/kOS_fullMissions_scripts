@@ -1,7 +1,7 @@
-runOncePath("lib/launch.ks").
-runOncePath("lib/system.ks").
-runOncePath("lib/mnv.ks").
 runOncePath("lib/geostationary.ks").
+runOncePath("lib/launch.ks").
+runOncePath("lib/mnv.ks").
+runOncePath("lib/system.ks").
 wait 0.1.
 
 global initGT is 31.
@@ -14,6 +14,15 @@ sas off.
 
 wait 0.1.
 
+set flightmode to -1.
+
+if ship:status = "prelaunch" {set flightmode to 1.}
+if ship:status = "orbiting" and ship:orbit:period < finalPeriod {set flightmode to 2.}
+if ship:status = "orbiting" and ship:orbit:period >= 0.98*finalPeriod {set flightmode to 3.}
+
+if flightmode < 0 {print "Flightmode ERROR.".}
+
+if flightmode = 1 {
 liftoff(3, targetInclination).
 triggerStaging().
 deploySystems("mainAntenna").
@@ -45,6 +54,11 @@ wait 1.
 clearScreen.
 wait 1.
 
+set flightmode to flightmode + 1.
+}
+
+
+if flightmode = 2 {
 
 // #############################################
 //       RAISING APO 
@@ -93,3 +107,61 @@ wait 0.
 set canStage to true.
 clearScreen.
 wait 1.
+
+set flightmode to flightmode + 1.
+}
+
+
+if flightmode = 3 {
+// #############################################
+//       SATELLITES 
+// #############################################
+
+local L is 10.
+until L <= 2 {
+  wait until kuniverse:activeVessel = ship.
+  wait 1.
+  list Processors in remainCPU.
+  set L to remainCPU:length.
+  if L = 1 {break.}
+
+  local nextShip is "geosat-" + (L-1):toString.
+
+  wait 1.
+
+  warpTo(time:seconds + ETA:periapsis - 300).
+  wait until kuniverse:timewarp:rate = 1.
+
+  wait 1.
+  lock steering to prograde.
+  wait until vAng(ship:facing:vector, prograde:vector) < 2.5.
+  stage.
+  print nextShip + " deployed.".
+  unlock steering.
+  sas on.
+  wait 1.
+
+  set kuniverse:activevessel to vessel(nextShip).
+}
+
+wait until kuniverse:activeVessel = ship.
+
+}
+
+wait 1.
+clearScreen.
+lock steering to retrograde.
+wait until vAng(ship:facing:vector, retrograde:vector) < 2.5.
+print "Ready to deorbit.".
+wait 1.
+
+lock throttle to 1.
+wait until ship:availableThrust <= 0.1.
+wait 0.5.
+
+print "ending program" at (0,5).
+set ship:control:pilotMainThrottle to 0.
+
+wait 1.
+core:part:getModule("kOSProcessor"):doEvent("Close Terminal").
+shutdown.

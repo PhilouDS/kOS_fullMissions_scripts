@@ -11,7 +11,7 @@ global function deployFairing {
   for part in fairing {
     part:getModule("ModuleProceduralFairing"):doevent("deploy").
   }
-  hudText("Fairing deployed", 1, 2, 30, rgb(1,1,0.5), false).
+  hudText("Fairing deployed", 1, 2, 30, rgb(1,0.498,0.208), false).
 }
 
 global function deployAntenna {
@@ -27,12 +27,12 @@ global function deployAntenna {
   for part in finalList {
     part:getModule("ModuleDeployableAntenna"):doevent("extend antenna").
   }
-  hudText("Antenna extended", 1, 2, 30, rgb(1,1,0.5), false).
+  hudText("Antenna extended", 1, 2, 30, rgb(1,0.498,0.208), false).
 }
 
 global function deployPanel {
   panels on.
-  hudText("Solar panel extended", 1, 2, 30, rgb(1,1,0.5), false).
+  hudText("Solar panel extended", 1, 2, 30, rgb(1,0.498,0.208), false).
 }
 
 global function deploySystems {
